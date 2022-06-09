@@ -1,0 +1,31 @@
+/.collabignore
+/.vscode
+/Build
+/Library
+/Logs
+/Packages
+/ProjectSettings
+/Temp
+/UIElementsSchema
+/UserSettings
+*.csproj
+*.sln
+*.meta
+webgl_sharing
+Assets/18SeamlessNormalMaps512Free
+Assets/Animation
+Assets/Editor
+Assets/Inputs
+Assets/Material
+Assets/Mesh
+Assets/Music
+Assets/PlayerPrefsEditor
+Assets/Prefab
+Assets/ProBuilder Data
+Assets/Scenes
+Assets/SFX
+Assets/TextMesh Pro
+Assets/Texture
+Assets/UI
+Assets/UI Toolkit
+ignore.conf
