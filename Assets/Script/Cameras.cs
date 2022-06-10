@@ -128,6 +128,19 @@ public class Cameras : MonoBehaviour
             cams[SelectedCam].transform.Find("Support/Mobile/Camera").localEulerAngles -= new Vector3(0, 20 * (float)(1 - posY / Screen.width) * Time.fixedDeltaTime, 0);
         }
     }
+    // a method that normalize the angle between 0 and 360
+    private float NormalizeAngle(float angle)
+    {
+        if (angle < 0)
+        {
+            angle += 360;
+        }
+        if (angle > 360)
+        {
+            angle -= 360;
+        }
+        return angle;
+    }
     // Update is called once per frame
     void FixedUpdate()
     {
@@ -138,20 +151,20 @@ public class Cameras : MonoBehaviour
             //player position
             Vector3 playerPos = transform.position;
             // camera rotation y
-            float camRotY = cams[SelectedCam].transform.localEulerAngles.y;
+            float camRotY = NormalizeAngle(cams[SelectedCam].transform.localEulerAngles.y);
             // camera position
             Vector3 camPos = cams[SelectedCam].transform.position;
             // angle around y axis between player and camera
             float angle;
-            if ((camRotY > 0 && camRotY <= 90) || (camRotY < -270 && camRotY >= -360))
+            if ((camRotY > 0 && camRotY <= 90) )
             { // si la camera est en -z
                 angle = Mathf.Atan2(playerPos.y - camPos.y, playerPos.z - camPos.z) * Mathf.Rad2Deg;
             }
-            else if (camRotY > 90 && camRotY <= 180 || (camRotY < -180 && camRotY >= -270))
+            else if (camRotY > 90 && camRotY <= 180)
             { // si la camera est en -x
                 angle = Mathf.Atan2(playerPos.y - camPos.y, playerPos.x - camPos.x) * Mathf.Rad2Deg;
             }
-            else if (camRotY > 180 && camRotY <= 270 || (camRotY < -90 && camRotY >= -180))
+            else if (camRotY > 180 && camRotY <= 270)
             {// si la camera est en +z
                 angle = 90 - Mathf.Atan2(playerPos.y - camPos.y, playerPos.z - camPos.z) * Mathf.Rad2Deg + 90;
             }
