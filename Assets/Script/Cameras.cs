@@ -13,11 +13,15 @@ public class Cameras : MonoBehaviour
     //Changement de camera , desactive l'ancienne camera et active la nouvelle
     private void ChangeCam(int index)
     {
-        cams[SelectedCam].GetComponent<Camera>().enabled = false;
-        cams[SelectedCam].GetComponent<AudioListener>().enabled = false;
+        // find camera component in cam[selectedCam] descendant and disable it
+        cams[SelectedCam].GetComponentInChildren<Camera>().enabled = false;
+        // same with audio listener
+        cams[SelectedCam].GetComponentInChildren<AudioListener>().enabled = false;
         SelectedCam = index;
-        cams[SelectedCam].GetComponent<Camera>().enabled = true;
-        cams[SelectedCam].GetComponent<AudioListener>().enabled = true;
+        // find camera component in cam[selectedCam] descendant and enable it
+        cams[SelectedCam].GetComponentInChildren<Camera>().enabled = true;
+        // same with audio listener
+        cams[SelectedCam].GetComponentInChildren<AudioListener>().enabled = true;
     }
     private int normalCam(int index)
     {
@@ -72,34 +76,25 @@ public class Cameras : MonoBehaviour
     }
     void Start()
     {
-        //On defini recupere les objet dans la scene
-        List<GameObject> objets = new List<GameObject>(gameObject.scene.GetRootGameObjects());
-        Transform level = GameObject.Find("Level").transform;
-        for (var i = 0; i < level.childCount ; i++)
+        //On defini recupere tout les gameObjects qui ont le tag "MainCamera" (pas camera car mainCamera est deja present dans le tag)
+        cams = new List<GameObject>(GameObject.FindGameObjectsWithTag("MainCamera"));
+        // on desactive tout les camera et audioListener pour eviter d'en avoir plusieurs
+        foreach (GameObject cam in cams)
         {
-            objets.Add(level.GetChild(i).gameObject);
-        }
-        foreach (GameObject o in objets)
-        {
-            //Si il s'agit d'un camera on l'ajoute a la liste des camera
-            if (o.TryGetComponent(typeof(Camera), out Component component))
-            {
-                cams.Add(o);
-                o.GetComponent<Camera>().enabled = false;
-                o.GetComponent<AudioListener>().enabled = false;
-            }
+            cam.GetComponentInChildren<Camera>().enabled = false;
+            cam.GetComponentInChildren<AudioListener>().enabled = false;
         }
         // On active la premiere camera
-        cams[SelectedCam].GetComponent<Camera>().enabled = true;
-        cams[SelectedCam].GetComponent<AudioListener>().enabled = true;
-        int index = -1;
-        while (index < 0 || index != SelectedCam)
+        cams[0].GetComponentInChildren<Camera>().enabled = true;
+        cams[0].GetComponentInChildren<AudioListener>().enabled = true;
+        // on cherche la première camera qui voit le joueur
+        Vector3 camPos = cams[SelectedCam].transform.position;
+        int index = SelectedCam;
+        while (index != SelectedCam)
         {
-            index = index > -1 ? index : SelectedCam;
-            Vector3 camPos = cams[index].transform.position;
             // Si la camera voit le joueur
-            if (Physics.Raycast(camPos, transform.position - camPos, out hit) && hit.transform.gameObject.CompareTag("Player")) break;
-            index = normalCam(index + 1);
+            if (Physics.Raycast(camPos, transform.position - camPos, out hit) && (hit.transform.gameObject.CompareTag("Player"))) break;
+            index = normalCam(index - 1);
         }
         ChangeCam(index);
     }
@@ -111,26 +106,26 @@ public class Cameras : MonoBehaviour
         if (posX > Screen.width * 2 / 3)
         {
             // on deplace la camera vers la droite
-            cams[SelectedCam].transform.localEulerAngles += new Vector3(0, 20 * (float)(posX / Screen.width) * Time.fixedDeltaTime, 0);
+            cams[SelectedCam].transform.Find("Support/Mobile").localEulerAngles -= new Vector3(0, 0, (float)(20 * (float)(posX / Screen.height)) * Time.fixedDeltaTime);
         }
         // Si on est dans la partie gauche de l'ecran
         else if (posX < Screen.width / 3)
         {
             // on deplace la camera vers la gauche
-            cams[SelectedCam].transform.localEulerAngles -= new Vector3(0, 20 * (float)(1 - posX / Screen.width) * Time.fixedDeltaTime, 0);
+            cams[SelectedCam].transform.Find("Support/Mobile").localEulerAngles += new Vector3(0, 0, (float)(20 * (float)(1 - posX / Screen.height)) * Time.fixedDeltaTime);
         }
         double posY = mousePos.y;
         // Si on est dans la partie haute de l'ecran
         if (posY > Screen.height * 2 / 3)
         {
             // on deplace la camera vers le haut
-            cams[SelectedCam].transform.localEulerAngles -= new Vector3((float)(20 * (float)(posY / Screen.height)) * Time.fixedDeltaTime, 0, 0);
+            cams[SelectedCam].transform.Find("Support/Mobile/Camera").localEulerAngles += new Vector3(0, 20 * (float)(posY / Screen.width) * Time.fixedDeltaTime, 0);
         }
         // Si on est dans la partie basse de l'ecran
         else if (posY < Screen.height / 3)
         {
             // on deplace la camera vers le bas
-            cams[SelectedCam].transform.localEulerAngles += new Vector3((float)(20 * (float)(1 - posY / Screen.height)) * Time.fixedDeltaTime, 0, 0);
+            cams[SelectedCam].transform.Find("Support/Mobile/Camera").localEulerAngles -= new Vector3(0, 20 * (float)(1 - posY / Screen.width) * Time.fixedDeltaTime, 0);
         }
     }
     // Update is called once per frame
@@ -139,9 +134,36 @@ public class Cameras : MonoBehaviour
         //Si le joueur appuis sur click droit
         if (PlayerPrefs.GetInt("CameraMode", 1) == 1)
         {
-            // Auto cam
-            cams[SelectedCam].transform.LookAt(transform);
-            cams[SelectedCam].GetComponent<Camera>().fieldOfView = 60;
+            // Change the camera rotation to look at the player
+            //player position
+            Vector3 playerPos = transform.position;
+            // camera rotation y
+            float camRotY = cams[SelectedCam].transform.localEulerAngles.y;
+            // camera position
+            Vector3 camPos = cams[SelectedCam].transform.position;
+            // angle around y axis between player and camera
+            float angle;
+            if ((camRotY > 0 && camRotY <= 90) || (camRotY < -270 && camRotY >= -360))
+            { // si la camera est en -z
+                angle = Mathf.Atan2(playerPos.y - camPos.y, playerPos.z - camPos.z) * Mathf.Rad2Deg;
+            }
+            else if (camRotY > 90 && camRotY <= 180 || (camRotY < -180 && camRotY >= -270))
+            { // si la camera est en -x
+                angle = Mathf.Atan2(playerPos.y - camPos.y, playerPos.x - camPos.x) * Mathf.Rad2Deg;
+            }
+            else if (camRotY > 180 && camRotY <= 270 || (camRotY < -90 && camRotY >= -180))
+            {// si la camera est en +z
+                angle = 90 - Mathf.Atan2(playerPos.y - camPos.y, playerPos.z - camPos.z) * Mathf.Rad2Deg + 90;
+            }
+            else
+            { // si la camera est en +x
+                angle = 90 - Mathf.Atan2(playerPos.y - camPos.y, playerPos.x - camPos.x) * Mathf.Rad2Deg + 90;
+            }
+
+            cams[SelectedCam].transform.Find("Support/Mobile/Camera").localEulerAngles = new Vector3(180, angle, 0);
+            //same around x axis
+            float angle2 = Mathf.Atan2(playerPos.x - camPos.x, playerPos.z - camPos.z) * Mathf.Rad2Deg;
+            cams[SelectedCam].transform.Find("Support/Mobile").localEulerAngles = new Vector3(0, 180, angle2 - cams[SelectedCam].transform.localEulerAngles.y + 90);
         }
         else
             // Manual cam
