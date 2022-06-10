@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
@@ -5,9 +6,14 @@ public static class localization
 {
     //csv file to read
     public static TextAsset translationFile;
+    // an liste of string to don't translate
+    static List<string> ignore = new List<string>(new string[]{
+            "+","-","*","/","=","(",")","[","]","{","}","<",">",";",":",",",".","!","?","#","$","%","^","&","|","~","`","@","_","\\","/","\"","'"," ","\n","\r","\t",Application.companyName, Application.productName ,"Version " + Application.version
+    });
     // method that take system language and return the language code
     // 0 : English , 1 : French
-    public static int getLanguage(){
+    public static int getLanguage()
+    {
         return 1; // for test purpose
         // switch (Application.systemLanguage)
         // {
@@ -35,19 +41,25 @@ public static class localization
         {
             // get the text content
             string textContent = text.text;
-            string textFinalContent = "";
-           // for each line in the text
+            text.text = "";
+            // for each line in the text
             foreach (string line in textContent.Split('\n'))
             {
                 // if the line is not empty translate it and add it to the final text
                 if (line != "")
                 {
-                    textFinalContent += findKey(line,getLanguage()) + "\n";
+                    float result;
+                    // if line is in ignore list or if the line is a number and can be parsed to a float don't translate it
+                    if (ignore.Contains(line) || (float.TryParse(line, out result)))
+                    {
+                        text.text += line + "\n";
+                    }
+                    else // else translate it
+                    {
+                        text.text += findKey(line, getLanguage()) + "\n";
+                    }
                 }
-
             }
-            // set the text to the final text
-            text.text = textFinalContent;
         }
 
         // same with TextMeshProUI
@@ -55,23 +67,22 @@ public static class localization
         foreach (TextMeshProUGUI text in textsUI)
         {
             string textContent = text.text;
-            string textFinalContent = "";
+            text.text = "";
             foreach (string line in textContent.Split('\n'))
             {
                 if (line != "")
                 {
-                    // if line is company , game name or version number , don't translate it
-                    if (line == "Company" || line == "Game Name" || line == "Version")
+                    float result;
+                    if (ignore.Contains(line) || (float.TryParse(line, out result)))
                     {
-                        textFinalContent += line + "\n";
+                        text.text += line + "\n";
                     }
                     else
                     {
-                        textFinalContent += findKey(line, getLanguage()) + "\n";
+                        text.text += findKey(line, getLanguage()) + "\n";
                     }
                 }
             }
-            text.text = textFinalContent;
         }
     }
     //function to find the key in the csv file
@@ -93,7 +104,7 @@ public static class localization
             }
         }
         //if the key is not found return the key
-        Debug.LogError("Key" + key + "not found in " + language + " language");
+        Debug.LogError("Key " + key + " not found in " + language + " language");
         return key;
     }
 }
