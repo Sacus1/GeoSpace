@@ -8,7 +8,7 @@ public static class localization
     public static TextAsset translationFile;
     // an liste of string to don't translate
     static List<string> ignore = new List<string>(new string[]{
-            "+","-","*","/","=","(",")","[","]","{","}","<",">",";",":",",",".","!","?","#","$","%","^","&","|","~","`","@","_","\\","/","\"","'"," ","\n","\r","\t",Application.companyName, Application.productName ,"Version " + Application.version
+            "+","-","*","/","=","(",")","[","]","{","}","<",">",";",":",",",".","!","?","#","$","%","^","&","|","~","`","@","_","\\","/","\"","'"," ","\n","\r","\t",Application.companyName, Application.productName ,"Version " + Application.version,"00.00.00","00:00:00","X","O"
     });
     // method that take system language and return the language code
     // 0 : English , 1 : French
