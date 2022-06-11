@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 public class DoorRespond : MessageRespondObj
 {
     // Attributs
@@ -8,32 +9,58 @@ public class DoorRespond : MessageRespondObj
     public int openID;
     // animator of the door
     public Animator animator;
+    bool isPlaying = false;
     // Methods
 
+    IEnumerator PlayAnime(bool state)
+    {
+        animator.SetBool("isOpen", state);
+        isPlaying = true;
+        yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
+        isPlaying = false;
+    }
+    IEnumerator WaitForAnimation(float time,bool state)
+    {
+        yield return new WaitForSeconds(time);
+        StartCoroutine(PlayAnime(state));
+    }
     // Use this for initialization
     void Start()
     {
         // Get the animator
         animator = GetComponent<Animator>();
-        // Set animation to reverse
-        animator.SetBool("isOpen", reverse);
-        // Set the door position
-        transform.Translate(0,reverse?-5:5,0);
+        StartCoroutine(PlayAnime(true));
+        if (!reverse)
+        {
+            StartCoroutine(WaitForAnimation(animator.GetCurrentAnimatorStateInfo(0).length, false));
+        }
     }
     public override void Activate(int mod)
     {
         if (mod == openID)
         {
-            // If the door is not reversed, open it else close it
-            animator.SetBool("isOpen", !reverse);
+            if (!isPlaying)
+            {
+                StartCoroutine(PlayAnime(!reverse));
+            }
+            else
+            {
+                StartCoroutine(WaitForAnimation(animator.GetCurrentAnimatorStateInfo(0).length, !reverse));
+            }
         }
     }
     public override void Desactivate(int mod)
     {
         if (mod == openID)
         {
-            // If the door is not reversed, close it else open it
-            animator.SetBool("isOpen", reverse);
+            if (!isPlaying)
+            {
+                StartCoroutine(PlayAnime(reverse));
+            }
+            else
+            {
+                StartCoroutine(WaitForAnimation(animator.GetCurrentAnimatorStateInfo(0).length, reverse));
+            }
         }
     }
 }
