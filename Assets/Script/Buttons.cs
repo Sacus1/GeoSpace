@@ -31,7 +31,7 @@ public class Buttons : MonoBehaviour
         string milliseconde = ((int)(T * 100 % 100)).ToString();
         string seconde = ((int)T % 60).ToString();
         string minute = ((int)T / 60).ToString();
-        Best.text = "Best : \n" + (minute.Length == 1 ? "0" + minute : minute) + ":" + (seconde.Length == 1 ? "0" + seconde : seconde) + ":" + (milliseconde.Length == 1 ? "0" + milliseconde : milliseconde);
+        Best.text = "Best:\n" + (minute.Length == 1 ? "0" + minute : minute) + ":" + (seconde.Length == 1 ? "0" + seconde : seconde) + ":" + (milliseconde.Length == 1 ? "0" + milliseconde : milliseconde);
         RetryButton.onClick.AddListener(Retry);
         MenuButton.onClick.AddListener(mainMenu);
     }

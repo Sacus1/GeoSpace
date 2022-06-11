@@ -88,13 +88,14 @@ public class Cameras : MonoBehaviour
         cams[0].GetComponentInChildren<Camera>().enabled = true;
         cams[0].GetComponentInChildren<AudioListener>().enabled = true;
         // on cherche la première camera qui voit le joueur
-        Vector3 camPos = cams[SelectedCam].transform.position;
-        int index = SelectedCam;
+        int index = normalCam(SelectedCam + 1);
         while (index != SelectedCam)
         {
+            Vector3 camPos = cams[index].transform.position;
             // Si la camera voit le joueur
-            if (Physics.Raycast(camPos, transform.position - camPos, out hit) && (hit.transform.gameObject.CompareTag("Player"))) break;
-            index = normalCam(index - 1);
+            if (Physics.Raycast(camPos, transform.position - camPos, out hit) && (hit.transform.gameObject.tag == "Player")) break;
+
+            index = normalCam(index + 1);
         }
         ChangeCam(index);
     }
@@ -156,7 +157,7 @@ public class Cameras : MonoBehaviour
             Vector3 camPos = cams[SelectedCam].transform.position;
             // angle around y axis between player and camera
             float angle;
-            if ((camRotY > 0 && camRotY <= 90) )
+            if ((camRotY > 0 && camRotY <= 90))
             { // si la camera est en -z
                 angle = Mathf.Atan2(playerPos.y - camPos.y, playerPos.z - camPos.z) * Mathf.Rad2Deg;
             }
