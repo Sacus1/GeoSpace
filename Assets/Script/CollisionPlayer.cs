@@ -25,10 +25,10 @@ public class CollisionPlayer : MonoBehaviour
                 if (SceneManager.GetActiveScene().buildIndex == 1)
                 {
                     PlayerPrefs.SetInt("Tutorial", 1);
-                    loader.LoadLevel(collision.gameObject.GetComponent<MessageRespond>().lvl + 1);
+                    loader.LoadLevel(collision.gameObject.GetComponent<LevelSelector>().lvl + 1);
                     break;
                 }
-                if (SceneManager.GetActiveScene().buildIndex + 1 >= SceneManager.sceneCountInBuildSettings)
+                if (SceneManager.GetActiveScene().buildIndex + 2 >= SceneManager.sceneCountInBuildSettings)
                 {
                     loader.LoadLevel(1);
                     PlayerPrefs.DeleteKey("Level");
