@@ -15,3 +15,18 @@ Leave,Quitter
 Level,Niveau
 Energy,Énergie
 Best:,Meilleur:
+Help :,Aide :
+ Play, Tester
+ Extrude, Extrude
+ Undo, Annuler
+ Select object, Sélectionner un objet
+Camera Control :,Controle de la camera :
+ Create new object, Créer un nouvel objet
+ Move sideway, Bouger latéralement
+ Move back and forth, Bouger avant et arrière
+ Rotate, Tourner
+ Save, Sauvegarder
+ Load, Charger
+ Delete, Supprimer
+Other :,Autre :
+Edit :,Editer :
